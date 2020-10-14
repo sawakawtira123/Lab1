@@ -15,6 +15,112 @@ public class Main extends JFrame {
     private final UndoManager undoManager = new UndoManager();
     private final SearchResultList searchResultList = new SearchResultList();
     Frame frame = new Frame();
+    ImageIcon saveIcon = new ImageIcon("C:\\Users\\dota_\\Desktop\\Laba1\\src\\resource\\images1\\Save.png");
+    ImageIcon saveAsIcon = new ImageIcon("C:\\Users\\dota_\\Desktop\\Laba1\\src\\resource\\images 2\\save.png");
+    ImageIcon copyIcon = new ImageIcon("C:\\Users\\dota_\\Desktop\\Laba1\\src\\resource\\images1\\Copy.png");
+    ImageIcon cutIcon = new ImageIcon("C:\\Users\\dota_\\Desktop\\Laba1\\src\\resource\\images1\\Cut.png");
+    ImageIcon helpIcon = new ImageIcon("C:\\Users\\dota_\\Desktop\\Laba1\\src\\resource\\images1\\Help.png");
+    ImageIcon newIcon = new ImageIcon("C:\\Users\\dota_\\Desktop\\Laba1\\src\\resource\\images1\\New.png");
+    ImageIcon openIcon = new ImageIcon("C:\\Users\\dota_\\Desktop\\Laba1\\src\\resource\\images1\\Open.png");
+    ImageIcon redoIcon = new ImageIcon("C:\\Users\\dota_\\Desktop\\Laba1\\src\\resource\\images1\\Redo.png");
+    ImageIcon pasteIcon = new ImageIcon("C:\\Users\\dota_\\Desktop\\Laba1\\src\\resource\\images1\\Paste.png");
+    ImageIcon undoIcon = new ImageIcon("C:\\Users\\dota_\\Desktop\\Laba1\\src\\resource\\images1\\Undo.png");
+
+    JButton saveAsButton = new JButton() {
+        {
+            setName("SaveAsButton");
+            setIcon(saveAsIcon);
+            setVerticalTextPosition(AbstractButton.CENTER);
+            setBorderPainted(false);
+            setPreferredSize(new Dimension(40, 30));
+            // addActionListener(saveAction);
+        }
+    };
+    JButton saveButton = new JButton() {
+        {
+            setName("SaveButton");
+            setIcon(saveIcon);
+            setBorderPainted(false);
+            setPreferredSize(new Dimension(100, 100));
+            // addActionListener(saveAction);
+        }
+    };
+    JButton copyButton = new JButton() {
+        private static final long serialVersionUID = 7183327104567601849L;
+
+        {
+            setName("CopyButton");
+            setIcon(copyIcon);
+            setPreferredSize(new Dimension(30, 30));
+            setBorderPainted(false);
+            addActionListener(e -> {
+                textArea.copy();
+            });
+        }
+    };
+    JButton cutButton = new JButton() {
+        private static final long serialVersionUID = 7183327104567601849L;
+
+        {
+            setName("CutButton");
+            setIcon(cutIcon);
+            setPreferredSize(new Dimension(30, 30));
+            setBorderPainted(false);
+            addActionListener(e -> {
+                textArea.cut();
+            });
+        }
+    };
+    JButton helpButton = new JButton() {
+        private static final long serialVersionUID = 7183327104567601849L;
+
+        {
+            setName("HelpButton");
+            setIcon(helpIcon);
+            setPreferredSize(new Dimension(30, 30));
+            setBorderPainted(false);
+            // addActionListener(saveAction);
+        }
+    };
+    JButton newButton = new JButton() {
+        private static final long serialVersionUID = 7183327104567601849L;
+
+        {
+            setName("NewButton");
+            setIcon(newIcon);
+            setPreferredSize(new Dimension(30, 30));
+            setBorderPainted(false);
+            // addActionListener(saveAction);
+        }
+    };
+    JButton pasteButton = new JButton() {
+        private static final long serialVersionUID = 7183327104567601849L;
+
+        {
+            setName("PasteButton");
+            setIcon(pasteIcon);
+            setPreferredSize(new Dimension(30, 30));
+            setBorderPainted(false);
+            addActionListener(e -> {
+                textArea.paste();
+            });
+        }
+    };
+    JButton undoButton = new JButton() {
+        private static final long serialVersionUID = 7183327104567601849L;
+
+        {
+            setName("UndoButton");
+            setIcon(undoIcon);
+            setPreferredSize(new Dimension(30, 30));
+            setBorderPainted(false);
+            addActionListener(e -> {
+                if (undoManager.canUndo()) {
+                    undoManager.undo();
+                }
+            });
+        }
+    };
     private JFileChooser fileChooser = null;
     private SearchWorker searchWorker;
     JTextArea textArea = new JTextArea(10, 80) {
@@ -55,10 +161,55 @@ public class Main extends JFrame {
             setName("ScrollPane");
         }
     };
+    JButton redoButton = new JButton() {
+        private static final long serialVersionUID = 7183327104567601849L;
+
+        {
+            setName("redoButton");
+            setIcon(redoIcon);
+            setPreferredSize(new Dimension(30, 30));
+            setBorderPainted(false);
+            addActionListener(e -> {
+                if (undoManager.canRedo()) {
+                    undoManager.redo();
+                    searchResultList.clear();
+                    if (searchWorker != null) {
+                        searchWorker.restart();
+                    }
+                }
+            });
+        }
+    };
     private int defaultAccelerator;
     private String currentDirectory = System.getProperty("user.home");
     private String currentFileName = "Untitled";
+    JButton openButton = new JButton() {
+        private static final long serialVersionUID = 7183327104567601849L;
 
+        {
+            setName("OpenButton");
+            setIcon(openIcon);
+            setPreferredSize(new Dimension(30, 30));
+            setBorderPainted(false);
+            addActionListener(e -> {
+                FileDialog fileDialog = new FileDialog(frame, "Open File", FileDialog.LOAD);
+                fileDialog.setMultipleMode(false);
+                fileDialog.setDirectory(currentDirectory);
+                fileDialog.setVisible(true);
+                currentDirectory = fileDialog.getDirectory();
+                if (fileDialog.getFile() != null) {
+                    currentFileName = fileDialog.getFile();
+                    String fileName = currentDirectory + currentFileName;
+                    try {
+                        textArea.setText(new String(Files.readAllBytes(Paths.get(fileName)), StandardCharsets.UTF_8));
+                        undoManager.discardAllEdits();
+                    } catch (IOException ioException) {
+                        ioException.printStackTrace();
+                    }
+                }
+            });
+        }
+    };
     public Main() {
         super("Compiler");
         JPanel contents = new JPanel();
@@ -70,16 +221,14 @@ public class Main extends JFrame {
         menuBar.add(createTextMenu());
         menuBar.add(createActionMenu());
         menuBar.add(createReferenceMenu());
-        contents.add(copyButton);
-        contents.add(copyButton);
         contents.add(cutButton);
-        contents.add(helpButton);
-        contents.add(newButton);
+        contents.add(saveAsButton);
         contents.add(openButton);
-        contents.add(redoButton);
-        contents.add(pasteButton);
+        contents.add(copyButton);
+        contents.add(newButton);
         contents.add(redoButton);
         contents.add(undoButton);
+        contents.add(pasteButton);
         contents.add(textPane);
         setContentPane(contents);
         // Создание экземпляра JFileChooser
@@ -87,113 +236,11 @@ public class Main extends JFrame {
         setVisible(true);
         setJMenuBar(menuBar);
     }
-    ImageIcon saveIcon = new ImageIcon("C:\\Users\\dota_\\Desktop\\Laba1\\src\\resource\\images1\\Save.png");
-    ImageIcon copyIcon = new ImageIcon("C:\\Users\\dota_\\Desktop\\Laba1\\src\\resource\\images1\\Copy.png");
-    ImageIcon cutIcon = new ImageIcon("C:\\Users\\dota_\\Desktop\\Laba1\\src\\resource\\images1\\Cut.png");
-    ImageIcon helpIcon = new ImageIcon("C:\\Users\\dota_\\Desktop\\Laba1\\src\\resource\\images1\\Help.png");
-    ImageIcon newIcon = new ImageIcon("C:\\Users\\dota_\\Desktop\\Laba1\\src\\resource\\images1\\New.png");
-    ImageIcon openIcon = new ImageIcon("C:\\Users\\dota_\\Desktop\\Laba1\\src\\resource\\images1\\Open.png");
-    ImageIcon redoIcon = new ImageIcon("C:\\Users\\dota_\\Desktop\\Laba1\\src\\resource\\images1\\Redo.png");
-    ImageIcon pasteIcon = new ImageIcon("C:\\Users\\dota_\\Desktop\\Laba1\\src\\resource\\images1\\Paste.png");
-    ImageIcon undoIcon = new ImageIcon("C:\\Users\\dota_\\Desktop\\Laba1\\src\\resource\\images1\\Undo.png");
 
     public static void main(String[] args) {
         JFrame.setDefaultLookAndFeelDecorated(true);
         new Main();
     }
-
-    JButton saveButton = new JButton() {
-        {
-            setName("SaveButton");
-            setIcon(saveIcon);
-            setVerticalTextPosition(AbstractButton.CENTER);
-            setBorderPainted(false);
-            setPreferredSize(new Dimension(100, 100));
-           // addActionListener(saveAction);
-        }
-    };
-
-    JButton copyButton = new JButton() {
-        private static final long serialVersionUID = 7183327104567601849L;
-        {
-            setName("CopyButton");
-            setIcon(copyIcon);
-            setPreferredSize(new Dimension(30, 30));
-            setBorderPainted(false);
-            // addActionListener(saveAction);
-        }
-    };
-
-    JButton cutButton = new JButton() {
-        private static final long serialVersionUID = 7183327104567601849L;
-        {
-            setName("CutButton");
-            setIcon(cutIcon);
-            setPreferredSize(new Dimension(30, 30));
-            setBorderPainted(false);
-            // addActionListener(saveAction);
-        }
-    };
-    JButton helpButton = new JButton() {
-        private static final long serialVersionUID = 7183327104567601849L;
-        {
-            setName("HelpButton");
-            setIcon(helpIcon);
-            setPreferredSize(new Dimension(30, 30));
-            setBorderPainted(false);
-            // addActionListener(saveAction);
-        }
-    };
-    JButton newButton = new JButton() {
-        private static final long serialVersionUID = 7183327104567601849L;
-        {
-            setName("NewButton");
-            setIcon(newIcon);
-            setPreferredSize(new Dimension(30, 30));
-            setBorderPainted(false);
-            // addActionListener(saveAction);
-        }
-    };
-    JButton openButton = new JButton() {
-        private static final long serialVersionUID = 7183327104567601849L;
-        {
-            setName("OpenButton");
-            setIcon(openIcon);
-            setPreferredSize(new Dimension(30, 30));
-            setBorderPainted(false);
-            // addActionListener(saveAction);
-        }
-    };
-    JButton redoButton = new JButton() {
-        private static final long serialVersionUID = 7183327104567601849L;
-        {
-            setName("redoButton");
-            setIcon(redoIcon);
-            setPreferredSize(new Dimension(30, 30));
-            setBorderPainted(false);
-            // addActionListener(saveAction);
-        }
-    };
-    JButton pasteButton = new JButton() {
-        private static final long serialVersionUID = 7183327104567601849L;
-        {
-            setName("PasteButton");
-            setIcon(pasteIcon);
-            setPreferredSize(new Dimension(30, 30));
-            setBorderPainted(false);
-            // addActionListener(saveAction);
-        }
-    };
-    JButton undoButton = new JButton() {
-        private static final long serialVersionUID = 7183327104567601849L;
-        {
-            setName("UndoButton");
-            setIcon(undoIcon);
-            setPreferredSize(new Dimension(30, 30));
-            setBorderPainted(false);
-            // addActionListener(saveAction);
-        }
-    };
 
     public JMenu createFileMenu() {
         JMenu file = new JMenu("Файл");
@@ -302,8 +349,7 @@ public class Main extends JFrame {
                         KeyStroke.getKeyStroke(KeyEvent.VK_C, KeyEvent.CTRL_DOWN_MASK));
             }
         };
-        JMenuItem paste = new JMenuItem("Вставить")
-        {
+        JMenuItem paste = new JMenuItem("Вставить") {
             {
                 addActionListener(e -> {
                     textArea.paste();
