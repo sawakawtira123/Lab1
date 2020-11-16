@@ -33,7 +33,22 @@ public class Main extends JFrame {
             setVerticalTextPosition(AbstractButton.CENTER);
             setBorderPainted(false);
             setPreferredSize(new Dimension(40, 30));
-            // addActionListener(saveAction);
+            addActionListener(e -> {
+                FileDialog fileDialog = new FileDialog(frame, "Save As ...", FileDialog.SAVE);
+                fileDialog.setDirectory(currentDirectory);
+                fileDialog.setFile(currentFileName);
+                fileDialog.setVisible(true);
+                currentDirectory = fileDialog.getDirectory();
+                if (fileDialog.getFile() != null) {
+                    currentFileName = fileDialog.getFile();
+                    String fileName = currentDirectory + currentFileName;
+                    try {
+                        Files.write(Paths.get(fileName), textArea.getText().getBytes(StandardCharsets.UTF_8));
+                    } catch (IOException ioException) {
+                        ioException.printStackTrace();
+                    }
+                }
+            });
         }
     };
     JButton saveButton = new JButton() {
